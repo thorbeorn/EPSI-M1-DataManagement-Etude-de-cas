@@ -1,2 +1,9 @@
 .DS_Store
 Data Management - Etude de cas.pdf
+
+blacklisted_ips.csv
+conversion_rates.csv
+patient_admissions.csv
+store_loyalty.csv
+transactions_log.csv
+web_orders.csv
