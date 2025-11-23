@@ -1,0 +1,40 @@
+id:
+  type: int64
+  description: Identifiant unique de l'employé dans la base de données.
+  confidentiality: Confidentiel
+  owner: IT
+sexe:
+  type: string
+  description: Sexe de l'employé, généralement 'M' pour masculin ou 'F' pour féminin.
+  confidentiality: PII
+  owner: RH
+date_naissance:
+  type: string
+  description: Date de naissance de l'employé au format AAAA-MM-JJ.
+  confidentiality: PII
+  owner: RH
+categorie_pro:
+  type: string
+  description: ''
+  confidentiality: Confidentiel
+  owner: Unknown
+email:
+  type: string
+  description: Adresse e-mail professionnelle de l'employé.
+  confidentiality: PII
+  owner: RH
+salaire_brut:
+  type: int64
+  description: Salaire brut annuel ou mensuel de l'employé, selon le contexte.
+  confidentiality: Confidentiel
+  owner: Finance
+date_embauche:
+  type: datetime64[us]
+  description: Date à laquelle l'employé a été embauché, au format AAAA-MM-JJ HH:MM:SS.
+  confidentiality: Confidentiel
+  owner: RH
+Hash_ID:
+  type: string
+  description: Remplace nom/prenom, pseudonymisé
+  confidentiality: Confidentiel
+  owner: RH

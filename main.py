@@ -3,7 +3,7 @@ import duckdb as ddb
 import yaml
 
 PATHS = {
-    "csv": "data/employees_raw.csv"
+    "csv": "data/employees_raw.csv",
     "yaml_metadata_gold": "output/gold_Dataframe_Metadata.yaml"
 }
 DESCRIPTION = {
@@ -171,6 +171,18 @@ def show_Dataframe_With_Role(df, role):
             df.drop('secu_sociale', inplace=True, axis=1)
             df['salaire_brut'] = df['salaire_brut'].round(-3)
             print(df)
+def generate_Dataframe_To_Dataframe(df):
+    gold_Dataframe_Metadata = {
+        col: {
+            "type": "string" if str(dtype) == "object" else str(dtype), 
+            "description": DESCRIPTION.get(col, ""), 
+            "confidentiality": CONFIDENTIALITY.get(col, "Confidentiel"),
+            "owner": OWNER.get(col, "Unknown")
+        }
+        for col, dtype in df.dtypes.items()
+    }
+    with open(PATHS["yaml_metadata_gold"], "w", encoding="utf-8") as file:
+        yaml.dump(gold_Dataframe_Metadata, file, allow_unicode=True, sort_keys=False)
 
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
@@ -185,17 +197,8 @@ def main():
     show_Dataframe_With_Role(gold_Dataframe, "Admin")
     show_Dataframe_With_Role(gold_Dataframe, "Manager")
 
-    gold_Dataframe_Metadata = {
-        col: {
-            "type": "string" if str(dtype) == "object" else str(dtype), 
-            "description": DESCRIPTION.get(col, ""), 
-            "confidentiality": CONFIDENTIALITY.get(col, "Confidentiel"),
-            "owner": OWNER.get(col, "Unknown")
-        }
-        for col, dtype in gold_Dataframe.dtypes.items()
-    }
+    generate_Dataframe_To_Dataframe(gold_Dataframe)
 
-    print(gold_Dataframe_Metadata)
 
 if __name__ == "__main__":
     main()
