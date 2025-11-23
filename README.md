@@ -15,3 +15,8 @@ supprime les valeurs negative, un salaire ne peux etre negatif
 supprime les valeurs fausse qui ne contionne pas de chiffre
 supprimes les character qui ne sont pas des chiffres dans la valeur salaire et renvoi un nombre
 transforme la colone en int
+
+function transform_Dataframe_Employment_Date
+reformat les date au bon format avec le bon separateur
+transforme les date au format date et le reste en null si c'est pas transformable
+supprime les valeurs nul

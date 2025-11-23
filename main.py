@@ -75,14 +75,41 @@ def transform_Dataframe_Salary(df):
     FROM df
     WHERE salaire_brut NOT LIKE '-%';
     """).df()
+def transform_Dataframe_Employment_Date(df):
+    return ddb.sql("""
+    WITH cleaned AS (
+        SELECT
+            *,
+            REPLACE(REPLACE(date_embauche, '/', '-'), '.', '-') AS date_norm
+        FROM df
+    ),
+    parsed AS (
+        SELECT
+            * EXCLUDE (date_embauche, date_norm),
+            CASE
+                WHEN date_norm LIKE '__-__-____'
+                    THEN STRPTIME(date_norm, '%d-%m-%Y')
+                WHEN date_norm LIKE '____-__-__ __:__:__'
+                    THEN STRPTIME(date_norm, '%Y-%m-%d %H:%M:%S')
+                WHEN date_norm LIKE '____-__-__'
+                    THEN STRPTIME(date_norm, '%Y-%m-%d')
+                ELSE NULL
+            END AS date_embauche
+        FROM cleaned
+    )
+
+    select *
+    FROM parsed
+    WHERE date_embauche IS NOT NULL
+      AND date_embauche <= CURRENT_DATE
+    """).df()
 
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
 
     silver_Dataframe = transform_Dataframe_Mail(raw_Dataframe)
     silver_Dataframe = transform_Dataframe_Salary(silver_Dataframe)
-
-    print(silver_Dataframe)
+    silver_Dataframe = transform_Dataframe_Employment_Date(silver_Dataframe)
 
 if __name__ == "__main__":
     main()
