@@ -67,10 +67,22 @@ def transform_Dataframe_Mail(df):
     df = df.drop(columns=["domain", "tld"])
     # Retourner le DataFrame dans le même schéma d'origine
     return df
+def transform_Dataframe_Salary(df):
+    return ddb.sql("""
+    SELECT 
+        * EXCLUDE (salaire_brut),
+        CAST(REGEXP_REPLACE(salaire_brut, '[^0-9]', '', 'g') AS BIGINT) AS salaire_brut
+    FROM df
+    WHERE salaire_brut NOT LIKE '-%';
+    """).df()
 
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
-    print(transform_Dataframe_Mail(raw_Dataframe))
+
+    silver_Dataframe = transform_Dataframe_Mail(raw_Dataframe)
+    silver_Dataframe = transform_Dataframe_Salary(silver_Dataframe)
+
+    print(silver_Dataframe)
 
 if __name__ == "__main__":
     main()
