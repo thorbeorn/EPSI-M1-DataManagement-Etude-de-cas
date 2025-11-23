@@ -24,3 +24,7 @@ supprime les valeurs nul
 function security_Dataframe_Full_Name
 hash le nom et le prenom en md5
 supprime les colone nom et prenom
+
+function security_Dataframe_Social_Number
+supprime les numero de secu de moin de 15 char
+mask les numero avec **** sauf la clé

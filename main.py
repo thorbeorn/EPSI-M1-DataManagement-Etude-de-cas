@@ -111,6 +111,22 @@ def security_Dataframe_Full_Name(df):
         MD5(COALESCE(nom, '') || '|' || COALESCE(prenom, '')) AS Hash_ID
     FROM df
     """).df()
+def security_Dataframe_Social_Number(df):
+    return ddb.sql("""
+    WITH masked AS (
+        SELECT 
+            * EXCLUDE (secu_sociale),
+            CASE 
+                WHEN secu_sociale IS NOT NULL AND LENGTH(secu_sociale) = 15 THEN
+                    '***********' || RIGHT(secu_sociale, 2)
+                ELSE NULL
+            END AS secu_sociale
+        FROM df
+    )
+    SELECT *
+    FROM masked
+    WHERE secu_sociale IS NOT NULL
+    """).df()
 
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
@@ -120,6 +136,7 @@ def main():
     silver_Dataframe = transform_Dataframe_Employment_Date(silver_Dataframe)
 
     gold_Dataframe = security_Dataframe_Full_Name(silver_Dataframe)
+    gold_Dataframe = security_Dataframe_Social_Number(gold_Dataframe)
     print(gold_Dataframe)
 
 if __name__ == "__main__":
