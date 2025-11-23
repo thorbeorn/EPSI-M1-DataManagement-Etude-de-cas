@@ -1,5 +1,6 @@
 import pandas as pd
 import duckdb as ddb
+import numpy as np
 import yaml
 
 PATHS = {
@@ -46,71 +47,72 @@ def extract_Dataframe_From_CSV(path):
     except Exception as e:
         raise ValueError(f"Error loading data: {e}")
 
-def transform_Dataframe_Mail(df):
-    # --- 0) Supprimer tout de suite les e-mails sans @ ---
-    df[df["email"].str.contains("@", na=False)].copy()
+def transform_Dataframe_Mail(df, kpi):
+    df = df.copy()
+    
+    kpi["emails_total"] = len(df)
+    
+    before = len(df)
+    df = df[df["email"].str.contains("@", na=False)].copy()
+    kpi["emails_supprimes_sans_at"] = before - len(df)
+    
     def fix_multiple_at(x):
-        # Si x n'est pas une string, on supprime
-        if not isinstance(x, str):
-            return None
-        # Si c'est "nan" (résultat de astype(str)), on supprime
-        if x.lower() == "nan":
+        if not isinstance(x, str) or x.lower() == "nan":
             return None
         parts = x.split("@")
         if len(parts) <= 2:
             return x
-        # garder premier @, supprimer les autres
         return parts[0] + "@" + "".join(parts[1:])
+    
+    df["email_before_fix"] = df["email"]
     df["email"] = df["email"].apply(fix_multiple_at)
+    
+    before = len(df)
     df = df[df["email"].str.contains("@", na=False)].copy()
-    # --- 1) Normaliser en minuscules ---
+    kpi["emails_supprimes_apres_fix"] = before - len(df)
+    
     df["email"] = df["email"].str.lower()
-    # --- 2) Extraire domaine (avant le premier point) ---
     df["domain"] = df["email"].str.extract(r"@([^\.]+)")
-    # --- 3) Extraire TLD (s’il existe) ---
     df["tld"] = df["email"].str.extract(r"\.([a-z]{2,})$")
-    # --- 4) Construire dictionnaire domaine → TLD basé sur la première occurrence ---
-    # On prend la TLD seulement si elle existe
-    domain_tld_map = (
-        df[df["tld"].notna()]
-        .groupby("domain")["tld"]
-        .first()           # première occurrence en cas de multiple occurrence
-        .to_dict()
-    )
-    # --- 5) Inline function to fix mail in parent df ---
+    
+    domain_tld_map = df[df["tld"].notna()].groupby("domain")["tld"].first().to_dict()
+    
     def fix_email(row):
         email = row["email"]
         domain = row["domain"]
         tld = row["tld"]
-
-        # Si déjà complet → OK
         if pd.notna(tld):
             return email
-
-        # Si pas de TLD mais un connu existe → compléter
         if domain in domain_tld_map:
             return f"{email}.{domain_tld_map[domain]}"
-
-        # Aucun TLD connu → ne rien changer
         return email
-    # --- 6) Appliquer correction ---
+    
     df["email"] = df.apply(fix_email, axis=1)
-    # --- 7) Supprimer les emails non réparables ---
+    
+    kpi["emails_corriges_tld"] = int((df["email"] != df["email_before_fix"]).sum())
+    
+    before = len(df)
     df = df[df["email"].notna()].copy()
-    # --- 8) Nettoyer colonnes temporaires ---
-    df = df.drop(columns=["domain", "tld"])
-    # Retourner le DataFrame dans le même schéma d'origine
-    return df
-def transform_Dataframe_Salary(df):
-    return ddb.sql("""
+    kpi["emails_supprimes_non_reparables"] = before - len(df)
+    
+    df = df.drop(columns=["domain", "tld", "email_before_fix"])
+    
+    return df, kpi
+def transform_Dataframe_Salary(df, kpi):
+    temp_df = ddb.sql("""
     SELECT 
         * EXCLUDE (salaire_brut),
         CAST(REGEXP_REPLACE(salaire_brut, '[^0-9]', '', 'g') AS BIGINT) AS salaire_brut
     FROM df
     WHERE salaire_brut NOT LIKE '-%';
     """).df()
-def transform_Dataframe_Employment_Date(df):
-    return ddb.sql("""
+
+    kpi["salaire_total"] = len(df)
+    kpi["salaire_supprimes"] = len(df) - len(temp_df)
+
+    return temp_df, kpi
+def transform_Dataframe_Employment_Date(df, kpi):
+    temp_df = ddb.sql("""
     WITH cleaned AS (
         SELECT
             *,
@@ -137,6 +139,10 @@ def transform_Dataframe_Employment_Date(df):
     WHERE date_embauche IS NOT NULL
       AND date_embauche <= CURRENT_DATE
     """).df()
+    kpi["salaire_total"] = len(df)
+    kpi["salaire_supprimes"] = len(df) - len(temp_df)
+
+    return temp_df, kpi
 
 def security_Dataframe_Full_Name(df):
     return ddb.sql("""
@@ -185,18 +191,21 @@ def generate_Dataframe_To_Dataframe(df):
         yaml.dump(gold_Dataframe_Metadata, file, allow_unicode=True, sort_keys=False)
 
 def main():
+    kpi = {}
+
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
 
-    silver_Dataframe = transform_Dataframe_Mail(raw_Dataframe)
-    silver_Dataframe = transform_Dataframe_Salary(silver_Dataframe)
-    silver_Dataframe = transform_Dataframe_Employment_Date(silver_Dataframe)
+    silver_Dataframe, kpi = transform_Dataframe_Mail(raw_Dataframe, kpi)
+    silver_Dataframe, kpi = transform_Dataframe_Salary(silver_Dataframe, kpi)
+    silver_Dataframe, kpi = transform_Dataframe_Employment_Date(silver_Dataframe, kpi)
 
     gold_Dataframe = security_Dataframe_Full_Name(silver_Dataframe)
     gold_Dataframe = security_Dataframe_Social_Number(gold_Dataframe)
 
     show_Dataframe_With_Role(gold_Dataframe, "Admin")
     show_Dataframe_With_Role(gold_Dataframe, "Manager")
-
+    print(kpi)
+    
     generate_Dataframe_To_Dataframe(gold_Dataframe)
 
 if __name__ == "__main__":
