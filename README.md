@@ -1,11 +1,18 @@
 data folder est le fichier avec le csv d'entree
 output folder est tout les fichier rendu generer par le script python
+    dashboard_rh.html - Dashboard interactif complet (ouvrirable dans n'importe quel navigateur)
+    kpi_report.txt - Rapport texte avec tous les KPI détaillés
+    distribution_sexe.csv - Données de répartition par sexe
+    distribution_categorie.csv - Données de répartition par catégorie professionnelle
+    distribution_age.csv - Données de répartition par âge
+    gold_Dataframe_Metadata.yaml - Produisez un tableau (ou YAML) décrivant votre dataset final Gold. Description, Type, Sensibilité(PII/Confidentiel/Public), Owner.
 .gitignore Liste des fichier ou dossier a ne pas push
 Backfill & Maintenance.md repond a la partie 3.2 de letude de cas
 Data Management - Etude de cas.pdf est le sujet de cette etude de cas, on a choisi le sujet n1 dans el PDF
 main.py fichier python principal
 README.md est le fichier de descprition du projet
 requirement.txt sont les requirement pour l'environnement python
+dashboard.py c'est un fichier python pour generer des dashboard avec les dataframe
 
 python3 -m venv venv
 source venv/bin/activate  # Sur Windows: venv\Scripts\activate

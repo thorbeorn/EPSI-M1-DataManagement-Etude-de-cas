@@ -2,3 +2,5 @@ pandas
 duckdb
 pyyaml
 numpy
+plotly
+kaleido

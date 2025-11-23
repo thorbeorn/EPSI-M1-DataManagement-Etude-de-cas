@@ -2,6 +2,7 @@ import pandas as pd
 import duckdb as ddb
 import numpy as np
 import yaml
+from dashboard import generate_dashboard
 
 PATHS = {
     "csv": "data/employees_raw.csv",
@@ -177,7 +178,7 @@ def show_Dataframe_With_Role(df, role):
             df.drop('secu_sociale', inplace=True, axis=1)
             df['salaire_brut'] = df['salaire_brut'].round(-3)
             print(df)
-def generate_Dataframe_To_Dataframe(df):
+def generate_Dataframe_To_Yaml(df):
     gold_Dataframe_Metadata = {
         col: {
             "type": "string" if str(dtype) == "object" else str(dtype), 
@@ -205,8 +206,9 @@ def main():
     show_Dataframe_With_Role(gold_Dataframe, "Admin")
     show_Dataframe_With_Role(gold_Dataframe, "Manager")
     print(kpi)
-    
-    generate_Dataframe_To_Dataframe(gold_Dataframe)
+
+    generate_Dataframe_To_Yaml(gold_Dataframe)
+    generate_dashboard(gold_Dataframe, kpi)
 
 if __name__ == "__main__":
     main()
