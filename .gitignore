@@ -6,3 +6,5 @@ patient_admissions.csv
 store_loyalty.csv
 transactions_log.csv
 web_orders.csv
+
+venv

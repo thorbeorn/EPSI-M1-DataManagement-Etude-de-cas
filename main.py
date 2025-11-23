@@ -1,10 +1,44 @@
 import pandas as pd
 import duckdb as ddb
+import yaml
 
 PATHS = {
     "csv": "data/employees_raw.csv"
+    "yaml_metadata_gold": "output/gold_Dataframe_Metadata.yaml"
 }
-
+DESCRIPTION = {
+    "id": "Identifiant unique de l'employé dans la base de données.",
+    "Hash_ID": "Remplace nom/prenom, pseudonymisé",
+    "sexe": "Sexe de l'employé, généralement 'M' pour masculin ou 'F' pour féminin.",
+    "date_naissance": "Date de naissance de l'employé au format AAAA-MM-JJ.",
+    "categorie": "Type de contrat ou statut de l'employé, par exemple 'Alternant', 'CDI', 'CDD'.",
+    "email": "Adresse e-mail professionnelle de l'employé.",
+    "salaire_brut": "Salaire brut annuel ou mensuel de l'employé, selon le contexte.",
+    "date_embauche": "Date à laquelle l'employé a été embauché, au format AAAA-MM-JJ HH:MM:SS.",
+    "secu_sociale": "Numéro de sécurité sociale de l'employé, identifiant unique pour les démarches administratives."
+}
+CONFIDENTIALITY = {
+    "id": "Confidentiel",
+    "Hash_ID": "Confidentiel",
+    "sexe": "PII",
+    "date_naissance": "PII",
+    "categorie": "Public",
+    "email": "PII",
+    "salaire_brut": "Confidentiel",
+    "date_embauche": "Confidentiel",
+    "secu_sociale": "PII"
+}
+OWNER = {
+    "id": "IT",
+    "Hash_ID": "RH",
+    "sexe": "RH",
+    "date_naissance": "RH",
+    "categorie": "RH",
+    "email": "RH",
+    "salaire_brut": "Finance",
+    "date_embauche": "RH",
+    "secu_sociale": "RH"
+}
 
 def extract_Dataframe_From_CSV(path):
     try:
@@ -108,7 +142,7 @@ def security_Dataframe_Full_Name(df):
     return ddb.sql("""
     SELECT 
         * EXCLUDE (nom, prenom),
-        MD5(COALESCE(nom, '') || '|' || COALESCE(prenom, '')) AS Hash_ID
+        CAST(MD5(COALESCE(nom, '') || '|' || COALESCE(prenom, '')) AS VARCHAR) AS Hash_ID
     FROM df
     """).df()
 def security_Dataframe_Social_Number(df):
@@ -150,6 +184,18 @@ def main():
 
     show_Dataframe_With_Role(gold_Dataframe, "Admin")
     show_Dataframe_With_Role(gold_Dataframe, "Manager")
+
+    gold_Dataframe_Metadata = {
+        col: {
+            "type": "string" if str(dtype) == "object" else str(dtype), 
+            "description": DESCRIPTION.get(col, ""), 
+            "confidentiality": CONFIDENTIALITY.get(col, "Confidentiel"),
+            "owner": OWNER.get(col, "Unknown")
+        }
+        for col, dtype in gold_Dataframe.dtypes.items()
+    }
+
+    print(gold_Dataframe_Metadata)
 
 if __name__ == "__main__":
     main()

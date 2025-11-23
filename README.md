@@ -1,3 +1,6 @@
+data folder est le fichier avec le csv d'entree
+output folder est tout les fichier rendu generer par le script python
+
 python3 -m venv venv
 source venv/bin/activate  # Sur Windows: venv\Scripts\activate
 
