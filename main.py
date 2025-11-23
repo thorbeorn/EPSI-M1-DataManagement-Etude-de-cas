@@ -104,12 +104,23 @@ def transform_Dataframe_Employment_Date(df):
       AND date_embauche <= CURRENT_DATE
     """).df()
 
+def security_Dataframe_Full_Name(df):
+    return ddb.sql("""
+    SELECT 
+        * EXCLUDE (nom, prenom),
+        MD5(COALESCE(nom, '') || '|' || COALESCE(prenom, '')) AS Hash_ID
+    FROM df
+    """).df()
+
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
 
     silver_Dataframe = transform_Dataframe_Mail(raw_Dataframe)
     silver_Dataframe = transform_Dataframe_Salary(silver_Dataframe)
     silver_Dataframe = transform_Dataframe_Employment_Date(silver_Dataframe)
+
+    gold_Dataframe = security_Dataframe_Full_Name(silver_Dataframe)
+    print(gold_Dataframe)
 
 if __name__ == "__main__":
     main()
