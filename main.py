@@ -128,6 +128,16 @@ def security_Dataframe_Social_Number(df):
     WHERE secu_sociale IS NOT NULL
     """).df()
 
+def show_Dataframe_With_Role(df, role):
+    role = role.lower()
+    match role:
+        case "admin":
+            print(df)
+        case "manager":
+            df.drop('secu_sociale', inplace=True, axis=1)
+            df['salaire_brut'] = df['salaire_brut'].round(-3)
+            print(df)
+
 def main():
     raw_Dataframe = extract_Dataframe_From_CSV(PATHS["csv"])
 
@@ -137,7 +147,9 @@ def main():
 
     gold_Dataframe = security_Dataframe_Full_Name(silver_Dataframe)
     gold_Dataframe = security_Dataframe_Social_Number(gold_Dataframe)
-    print(gold_Dataframe)
+
+    show_Dataframe_With_Role(gold_Dataframe, "Admin")
+    show_Dataframe_With_Role(gold_Dataframe, "Manager")
 
 if __name__ == "__main__":
     main()
