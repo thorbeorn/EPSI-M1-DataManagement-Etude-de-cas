@@ -8,3 +8,4 @@ transactions_log.csv
 web_orders.csv
 
 venv
+__pycache__
