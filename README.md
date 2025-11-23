@@ -1,5 +1,11 @@
 data folder est le fichier avec le csv d'entree
 output folder est tout les fichier rendu generer par le script python
+.gitignore Liste des fichier ou dossier a ne pas push
+Backfill & Maintenance.md repond a la partie 3.2 de letude de cas
+Data Management - Etude de cas.pdf est le sujet de cette etude de cas, on a choisi le sujet n1 dans el PDF
+main.py fichier python principal
+README.md est le fichier de descprition du projet
+requirement.txt sont les requirement pour l'environnement python
 
 python3 -m venv venv
 source venv/bin/activate  # Sur Windows: venv\Scripts\activate
