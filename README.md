@@ -28,3 +28,8 @@ supprime les colone nom et prenom
 function security_Dataframe_Social_Number
 supprime les numero de secu de moin de 15 char
 mask les numero avec **** sauf la clé
+
+function show_Dataframe_With_Role
+affiche le dataframe suivant le role
+admin vois tout
+manager vois tous sauf numero de secu et le salaire brut arrondi au milier pret 41520 -> 41000
