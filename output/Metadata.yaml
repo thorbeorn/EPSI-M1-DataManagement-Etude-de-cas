@@ -1,0 +1,69 @@
+## Métadonnées du dataset Gold
+
+```yaml
+dataset: employees_gold
+owner: Direction_RH
+description: >
+  Dataset final nettoyé, anonymisé et gouverné dans le cadre du projet
+  People Analytics, conforme aux exigences RGPD et aux bonnes pratiques
+  de Data Management.
+
+columns:
+
+  - name: Hash_ID
+    description: Identifiant pseudonymisé unique dérivé du nom, prénom et date de naissance.
+    type: string
+    sensitivity: Pseudonymized
+    owner: Data Team
+
+  - name: sexe
+    description: Sexe déclaré de l’employé.
+    type: categorical
+    sensitivity: PII
+    owner: RH
+
+  - name: date_naissance
+    description: Date de naissance de l’employé.
+    type: date
+    sensitivity: Highly Sensitive (PII)
+    owner: RH
+
+  - name: categorie_pro
+    description: Catégorie socioprofessionnelle (cadre, employé, technicien, etc.).
+    type: string
+    sensitivity: Public
+    owner: RH
+
+  - name: email
+    description: Adresse email professionnelle, nettoyée et validée via regex.
+    type: string
+    sensitivity: PII
+    owner: RH
+
+  - name: salaire_brut
+    description: >
+      Salaire annuel brut en euros, converti depuis un format textuel hétérogène
+      vers un entier. Utilisé pour les analyses de parité salariale.
+    type: integer
+    sensitivity: Confidentiel
+    owner: Finance
+
+  - name: date_embauche
+    description: Date d’entrée de l’employé dans l’entreprise (format ISO YYYY-MM-DD).
+    type: date
+    sensitivity: Public
+    owner: RH
+
+  - name: secu_sociale
+    description: Numéro de sécurité sociale complet (réservé au rôle Admin).
+    type: string
+    sensitivity: Highly Sensitive (Secret)
+    owner: Compliance
+
+  - name: secu_sociale_masked
+    description: Version masquée de la sécurité sociale (garde uniquement les 2 derniers chiffres).
+    type: string
+    sensitivity: Restricted
+    owner: Compliance
+
+```
