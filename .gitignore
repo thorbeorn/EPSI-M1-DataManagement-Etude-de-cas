@@ -1,4 +1,5 @@
 .DS_Store
+.git
 
 blacklisted_ips.csv
 conversion_rates.csv
@@ -6,6 +7,11 @@ patient_admissions.csv
 store_loyalty.csv
 transactions_log.csv
 web_orders.csv
+
+output/Dashboard.png
+output/Metadata.yaml
+
+*.ipynb
 
 venv
 __pycache__
